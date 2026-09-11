@@ -1,0 +1,1816 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Paycheck</title>
+<style>
+:root{
+  --bg:#f6f7fb;--card:#fff;--text:#121826;--muted:#667085;--line:#e4e7ec;
+  --accent:#1466d8;--accent-soft:#eaf3ff;--navy:#172033;--good:#147d48;--warn:#a16207;--danger:#b42318;
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(135deg,#f8f8ff,#fbf7fb);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}
+.shell{max-width:1260px;margin:0 auto;padding:28px 18px 70px}
+header{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;margin-bottom:26px}
+h1{font-size:44px;line-height:1;margin:0 0 8px;letter-spacing:-.04em}
+.subtitle{color:var(--muted);font-size:16px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:var(--card);border-radius:13px;padding:10px 16px;font-weight:850;cursor:pointer}
+.tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.page{display:none}.page.active{display:block}
+.grid{display:grid;grid-template-columns:1.08fr .92fr;gap:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 14px 40px rgba(16,24,40,.055)}
+.card-head{padding:20px 22px;border-bottom:1px solid var(--line)}
+.card-head h2{margin:0;font-size:22px;letter-spacing:-.02em}
+.card-body{padding:20px 22px}
+.segmented{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.segmented button{border:1px solid var(--line);background:#fff;border-radius:13px;padding:11px 9px;font-weight:900;cursor:pointer}
+.segmented button.active{background:var(--accent-soft);border-color:var(--accent);color:#174ea6}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+label{display:block;font-size:12px;font-weight:900;margin-bottom:6px}
+input,select{width:100%;border:1px solid #d0d5dd;border-radius:12px;padding:12px 13px;background:#fff;color:var(--text)}
+input:focus,select:focus{outline:2px solid #b8d3ff;outline-offset:1px}
+.helper{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.4}
+.section-title{font-size:14px;font-weight:950;margin:20px 0 10px}
+.ote-panel,.advanced-panel{border:1px solid #c7dbff;background:var(--accent-soft);border-radius:18px;padding:16px;margin-bottom:16px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.metric{border:1px solid var(--line);background:#fff;border-radius:15px;padding:12px}
+.metric .k,.mini .k{font-size:10px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.07em}
+.metric .v{font-size:22px;font-weight:950;margin-top:4px}
+.hidden{display:none!important}
+.result-hero{padding:20px;border-radius:18px;background:linear-gradient(135deg,#111827,#27344f);color:#fff;margin-bottom:14px}
+.result-hero .label{font-size:11px;opacity:.76;text-transform:uppercase;font-weight:900;letter-spacing:.08em}
+.result-hero .amount{font-size:42px;font-weight:950;margin-top:4px;letter-spacing:-.035em}
+.result-hero .gross{font-size:12px;opacity:.82;margin-top:7px}
+.result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}
+.mini{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}
+.mini .v{font-size:18px;font-weight:950;margin-top:3px}
+.breakdown{display:grid}
+.line{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid var(--line)}
+.line:last-child{border-bottom:0}.line strong{white-space:nowrap}
+.line.total{font-size:17px;padding-top:14px}.line.negative strong{color:var(--danger)}
+.note{border:1px dashed #cbd5e1;background:#f8fafc;border-radius:14px;padding:12px;font-size:12px;color:#475467;line-height:1.55}
+.tax-note{font-size:11px;color:var(--muted);margin-top:14px;line-height:1.5}
+.deductions{display:grid;gap:8px}
+.ded-row{display:grid;grid-template-columns:1.25fr .7fr .9fr 1fr auto;gap:8px;align-items:center}
+.icon-btn{width:auto;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px;cursor:pointer}
+.secondary,.primary{border-radius:12px;padding:10px 13px;font-weight:900;cursor:pointer}
+.secondary{border:1px solid var(--line);background:#fff;color:var(--text)}
+.primary{border:1px solid var(--accent);background:var(--accent);color:#fff}
+.checkbox-line{display:flex;align-items:center;gap:8px}.checkbox-line input{width:auto}
+.badge{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;background:#eef4ff;color:#295ea8;font-size:10px;font-weight:900}
+.save-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.saved-list{display:grid;gap:12px}
+.saved-card{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff}
+.saved-card-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.saved-card h3{margin:0 0 4px}.saved-meta{font-size:11px;color:var(--muted)}
+.saved-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.compare-result{border:1px solid var(--line);border-radius:18px;padding:16px;background:#fff}
+.compare-result h3{margin:0 0 12px}
+.compare-winner{background:#ecfdf3;border-color:#a7f3d0}
+@media(max-width:900px){
+  header{align-items:flex-start;flex-direction:column}
+  .grid,.compare-grid{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr}
+  .metrics,.result-grid{grid-template-columns:1fr 1fr}
+  .ded-row{grid-template-columns:1fr 1fr}
+  .ded-row .ded-name{grid-column:1/-1}
+  h1{font-size:36px}
+}
+@media(max-width:560px){
+  .shell{padding:18px 12px 50px}
+  .metrics,.result-grid,.segmented{grid-template-columns:1fr}
+  .card-body,.card-head{padding-left:15px;padding-right:15px}
+  .result-hero .amount{font-size:35px}
+}
+
+.subsection-label{font-size:12px;font-weight:950;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:4px 0 8px}
+.friendly-deduction-row{grid-template-columns:1.45fr .75fr 1fr auto!important}
+.advanced-tax-details{margin-top:10px;border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+.advanced-tax-details summary{cursor:pointer;list-style:none;padding:12px 14px;font-weight:900}
+.advanced-tax-details summary::-webkit-details-marker{display:none}
+.advanced-tax-details summary::after{content:"＋";float:right;color:var(--muted)}
+.advanced-tax-details[open] summary::after{content:"−"}
+.advanced-tax-details .advanced-panel{margin:0;border:0;border-top:1px solid var(--line);border-radius:0;background:#f8fafc}
+@media(max-width:900px){
+  .friendly-deduction-row{grid-template-columns:1fr 1fr!important}
+  .friendly-deduction-row .ded-select{grid-column:1/-1}
+}
+
+
+.header-right{display:flex;align-items:center;gap:10px;position:relative;flex-wrap:wrap;justify-content:flex-end}
+.account-chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:9px 12px;font-weight:900;cursor:pointer;display:flex;align-items:center;gap:7px}
+.account-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px #dcfce7}
+.account-menu{position:absolute;right:0;top:48px;z-index:200;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 40px rgba(16,24,40,.14);padding:10px;min-width:210px}
+.account-menu button{display:block;width:100%;border:0;background:transparent;text-align:left;padding:9px;border-radius:9px;cursor:pointer;font-weight:800}
+.account-menu button:hover{background:#f8fafc}
+.account-email{font-size:11px;color:var(--muted);padding:6px 9px 9px;border-bottom:1px solid var(--line);margin-bottom:4px;overflow-wrap:anywhere}
+
+.auth-gate{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:20px;background:
+radial-gradient(circle at 15% 20%,rgba(20,102,216,.18),transparent 32%),
+radial-gradient(circle at 80% 15%,rgba(168,85,247,.13),transparent 28%),
+linear-gradient(135deg,#f5f8ff,#fff8fb)}
+.auth-card{width:min(470px,100%);background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:26px;padding:26px;box-shadow:0 30px 80px rgba(16,24,40,.14);backdrop-filter:blur(18px)}
+.auth-brand{font-size:34px;font-weight:950;letter-spacing:-.04em;margin-bottom:20px}
+.auth-card h2{margin:0 0 8px;font-size:25px}.auth-card p{margin:0 0 18px;color:var(--muted);line-height:1.55}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.auth-tabs button{border:1px solid var(--line);background:#fff;padding:10px;border-radius:12px;font-weight:900;cursor:pointer}
+.auth-tabs button.active{background:var(--navy);color:#fff}
+.auth-submit{width:100%}.auth-message{font-size:12px;color:var(--muted);margin-top:10px;min-height:18px}
+
+.attainment-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.attainment-pills button{border:1px solid #b8cff5;background:#fff;color:#174ea6;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:900;cursor:pointer}
+.attainment-pills button:hover{background:#dbeafe}
+
+.take-home-meter{margin-top:14px;padding-top:13px;border-top:1px solid rgba(255,255,255,.15)}
+.take-home-meter-row{display:flex;justify-content:space-between;font-size:11px;font-weight:900}
+.take-home-track{height:9px;border-radius:999px;background:rgba(255,255,255,.15);overflow:hidden;margin-top:7px}
+.take-home-track span{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#60a5fa,#34d399);transition:width .35s ease}
+.take-home-mood{font-size:11px;opacity:.82;margin-top:7px}
+.result-hero.pulse{animation:resultPulse .28s ease}
+@keyframes resultPulse{0%{transform:scale(.99);opacity:.88}100%{transform:scale(1);opacity:1}}
+.cloud-note{font-size:11px;color:var(--muted);margin-top:4px}
+
+.mobile-net-bar{display:none}
+.sync-flash{animation:syncFlash .5s ease}
+@keyframes syncFlash{0%,100%{box-shadow:0 0 0 0 rgba(20,102,216,0)}50%{box-shadow:0 0 0 6px rgba(20,102,216,.12)}}
+
+@media(max-width:900px){
+  .header-right{width:100%;justify-content:space-between}
+  .tabs{overflow:auto;flex-wrap:nowrap;max-width:calc(100vw - 130px);padding-bottom:2px}
+  .tab{white-space:nowrap}
+  .account-menu{left:auto;right:0}
+}
+@media(max-width:560px){
+  body{padding-bottom:76px}
+  header{gap:12px}
+  .header-right{align-items:center}
+  .tabs{max-width:100%;order:2;width:100%}
+  .account-chip{position:absolute;right:0;top:-57px}
+  .grid{gap:14px}
+  .card{border-radius:18px}
+  .row{gap:10px}
+  input,select{font-size:16px}
+  .result-hero{position:relative}
+  .attainment-pills{display:grid;grid-template-columns:repeat(4,1fr)}
+  .attainment-pills button{padding:7px 5px}
+  .mobile-net-bar{
+    position:fixed;left:8px;right:8px;bottom:8px;z-index:7000;
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    background:rgba(17,24,39,.94);color:#fff;border-radius:17px;padding:11px 13px;
+    box-shadow:0 14px 38px rgba(17,24,39,.25);backdrop-filter:blur(14px)
+  }
+  .mobile-net-bar span{display:block;font-size:10px;opacity:.72;text-transform:uppercase;font-weight:900}
+  .mobile-net-bar strong{display:block;font-size:20px;margin-top:2px}
+  .mobile-net-bar button{border:0;background:#fff;color:#111827;border-radius:11px;padding:8px 10px;font-size:11px;font-weight:900}
+  .auth-card{padding:21px 16px;border-radius:22px}
+}
+
+
+/* ===== Mobile-first polish pass ===== */
+@media(max-width:560px){
+  html,body{max-width:100%;overflow-x:hidden}
+  body{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
+
+  .shell{
+    padding:18px 12px calc(82px + env(safe-area-inset-bottom));
+    width:100%;
+    max-width:100%;
+  }
+
+  header{
+    position:relative;
+    display:block;
+    margin-bottom:16px;
+    padding-right:0;
+  }
+
+  header>div:first-child{
+    padding-right:56px;
+    margin-bottom:14px;
+  }
+
+  h1{
+    font-size:38px;
+    line-height:.98;
+    margin:0 0 8px;
+    letter-spacing:-.045em;
+  }
+
+  .subtitle{
+    font-size:14px;
+    line-height:1.35;
+    max-width:280px;
+  }
+
+  .header-right{
+    display:block;
+    width:100%;
+    position:static;
+  }
+
+  .account-chip{
+    position:absolute;
+    top:4px;
+    right:0;
+    width:42px;
+    height:42px;
+    padding:0;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    box-shadow:0 4px 12px rgba(16,24,40,.08);
+  }
+
+  .account-chip .account-dot{
+    width:11px;
+    height:11px;
+    margin:0;
+  }
+
+  .account-chip #accountLabel{
+    display:none;
+  }
+
+  .account-menu{
+    top:50px;
+    right:0;
+    width:min(260px,calc(100vw - 24px));
+  }
+
+  .tabs{
+    width:100%;
+    max-width:none;
+    display:grid;
+    grid-template-columns:1fr 1fr 1.25fr;
+    gap:6px;
+    overflow:visible;
+    padding:0;
+  }
+
+  .tab{
+    min-width:0;
+    width:100%;
+    padding:10px 6px;
+    font-size:12px;
+    border-radius:12px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .grid{
+    display:block;
+  }
+
+  .grid>section.card,
+  .grid>aside.card{
+    width:100%;
+    margin:0 0 14px;
+  }
+
+  .card{
+    border-radius:18px;
+    box-shadow:0 8px 24px rgba(16,24,40,.05);
+  }
+
+  .card-head{
+    padding:16px 15px;
+  }
+
+  .card-head h2{
+    font-size:21px;
+  }
+
+  .card-body{
+    padding:14px 15px 16px;
+  }
+
+  .segmented{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:6px;
+    margin-bottom:16px;
+  }
+
+  .segmented button{
+    min-width:0;
+    padding:10px 5px;
+    font-size:12px;
+    line-height:1.15;
+    border-radius:11px;
+    white-space:normal;
+  }
+
+  #oteBtn{
+    font-size:11px;
+  }
+
+  .row{
+    grid-template-columns:1fr;
+    gap:10px;
+    margin-bottom:12px;
+  }
+
+  label{
+    font-size:12px;
+    margin-bottom:5px;
+  }
+
+  input,select{
+    min-height:48px;
+    padding:11px 12px;
+    font-size:16px;
+    border-radius:11px;
+  }
+
+  .section-title{
+    margin:17px 0 9px;
+    font-size:14px;
+  }
+
+  .ote-panel,.advanced-panel{
+    padding:13px;
+    border-radius:15px;
+  }
+
+  .metrics{
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+
+  .metric{
+    padding:10px;
+  }
+
+  .metric:last-child:nth-child(odd){
+    grid-column:1/-1;
+  }
+
+  .metric .v{
+    font-size:18px;
+  }
+
+  .friendly-deduction-row{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:7px!important;
+    margin-bottom:8px;
+  }
+
+  .friendly-deduction-row .ded-select{
+    grid-column:1/-1;
+  }
+
+  .friendly-deduction-row .ded-amount,
+  .friendly-deduction-row .ded-amount-type{
+    min-width:0;
+  }
+
+  .friendly-deduction-row .icon-btn{
+    grid-column:1/-1;
+    width:100%;
+    padding:8px;
+  }
+
+  .save-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+
+  .save-row input{
+    grid-column:1/-1;
+    min-width:0!important;
+  }
+
+  .save-row .primary,.save-row .secondary{
+    width:100%;
+  }
+
+  .result-hero{
+    padding:17px;
+    border-radius:15px;
+    margin-bottom:12px;
+  }
+
+  .result-hero .amount{
+    font-size:34px;
+  }
+
+  .result-grid{
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+
+  .mini{
+    padding:10px;
+  }
+
+  .mini .v{
+    font-size:16px;
+  }
+
+  .line{
+    font-size:13px;
+    gap:10px;
+    padding:9px 0;
+  }
+
+  .line strong{
+    text-align:right;
+  }
+
+  .attainment-pills{
+    grid-template-columns:repeat(4,1fr);
+    gap:5px;
+  }
+
+  .attainment-pills button{
+    padding:7px 4px;
+    font-size:10px;
+  }
+
+  .mobile-net-bar{
+    left:8px;
+    right:8px;
+    bottom:calc(8px + env(safe-area-inset-bottom));
+    min-height:56px;
+    padding:9px 11px;
+    border-radius:15px;
+    gap:8px;
+  }
+
+  .mobile-net-bar span{
+    font-size:9px;
+    letter-spacing:.04em;
+  }
+
+  .mobile-net-bar strong{
+    font-size:18px;
+    margin-top:1px;
+  }
+
+  .mobile-net-bar button{
+    padding:8px 9px;
+    font-size:10px;
+    border-radius:10px;
+    white-space:nowrap;
+  }
+
+  .auth-gate{
+    padding:14px;
+    align-items:flex-start;
+    padding-top:max(24px,env(safe-area-inset-top));
+  }
+
+  .auth-card{
+    margin-top:24px;
+    width:100%;
+    padding:20px 15px;
+    border-radius:20px;
+  }
+
+  .auth-brand{
+    font-size:30px;
+    margin-bottom:16px;
+  }
+
+  .auth-card h2{
+    font-size:22px;
+  }
+
+  .auth-tabs{
+    gap:6px;
+  }
+
+  .cloud-note{
+    font-size:10px;
+    margin-top:3px;
+  }
+}
+
+@media(max-width:380px){
+  .tab{font-size:11px;padding:9px 4px}
+  .segmented button{font-size:11px}
+  #oteBtn{font-size:10px}
+  .result-grid,.metrics{grid-template-columns:1fr}
+  .metric:last-child:nth-child(odd){grid-column:auto}
+}
+
+
+.mobile-ote-label{display:none}
+@media(max-width:560px){
+  .desktop-ote-label{display:none}
+  .mobile-ote-label{display:inline}
+}
+
+
+.pay-mode-grid{grid-template-columns:repeat(4,1fr)}
+.accelerator-box{border:1px dashed #9fc0f4;border-radius:13px;padding:11px;margin:11px 0;background:rgba(255,255,255,.58)}
+.state-coverage-note{font-size:11px;color:var(--muted);line-height:1.5;margin:-2px 0 14px;padding:10px 12px;border-radius:12px;background:#f8fafc;border:1px solid var(--line)}
+.offer-tools{margin-top:12px}
+.result-actions{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.result-actions button{flex:1}
+@media print{
+  .auth-gate,.header-right,.mobile-net-bar,.save-row,.result-actions,.secondary,.primary{display:none!important}
+  body{background:#fff}
+  .shell{max-width:none;padding:0}
+  .card{box-shadow:none;break-inside:avoid}
+}
+@media(max-width:560px){
+  .pay-mode-grid{grid-template-columns:1fr 1fr!important}
+  .pay-mode-grid button{min-height:48px}
+  .result-actions{display:grid;grid-template-columns:1fr 1fr}
+}
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="authGate" class="auth-gate">
+  <div class="auth-card">
+    <div class="auth-brand">Paycheck</div>
+    <h2>Take your calculator with you.</h2>
+    <p>Sign in once and your current calculator setup, deductions, saved offers, and comparisons follow you across devices.</p>
+
+    <div class="auth-tabs">
+      <button id="authSignInTab" class="active" onclick="setAuthMode('signin')">Sign in</button>
+      <button id="authSignUpTab" onclick="setAuthMode('signup')">Create account</button>
+    </div>
+
+    <form id="authForm" onsubmit="submitAuth(event)">
+      <div id="authNameRow" class="row hidden">
+        <div><label>First name</label><input id="authFirstName" autocomplete="given-name"></div>
+        <div><label>Last name</label><input id="authLastName" autocomplete="family-name"></div>
+      </div>
+      <div style="margin-bottom:12px"><label>Email</label><input id="authEmail" type="email" autocomplete="email" required></div>
+      <div style="margin-bottom:12px"><label>Password</label><input id="authPassword" type="password" autocomplete="current-password" minlength="6" required></div>
+      <button id="authSubmit" class="primary auth-submit" type="submit">Sign in</button>
+      <div id="authMessage" class="auth-message"></div>
+    </form>
+  </div>
+</div>
+
+<div id="appShell" class="hidden">
+<div class="shell">
+<header>
+  <div>
+    <h1>Paycheck</h1>
+    <div class="subtitle">Know what you're actually taking home.</div>
+  </div>
+  <div class="header-right">
+    <div class="tabs">
+      <button class="tab active" data-page="calculator" onclick="showPage('calculator')">Calculator</button>
+      <button class="tab" data-page="compare" onclick="showPage('compare')">Compare</button>
+      <button class="tab" data-page="saved" onclick="showPage('saved')">Saved Paychecks</button>
+    </div>
+    <button class="account-chip" onclick="toggleAccountMenu()">
+      <span class="account-dot"></span>
+      <span id="accountLabel">Account</span>
+    </button>
+    <div id="accountMenu" class="account-menu hidden">
+      <div id="accountEmail" class="account-email"></div>
+      <button onclick="syncNow()">Sync now</button>
+      <button onclick="signOut()">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<section id="page-calculator" class="page active">
+<div class="grid">
+  <section class="card">
+    <div class="card-head"><h2>Compensation</h2></div>
+    <div class="card-body">
+      <div class="segmented pay-mode-grid">
+        <button id="salaryBtn" class="active" onclick="setMode('salary')">Salary</button>
+        <button id="hourlyBtn" onclick="setMode('hourly')">Hourly</button>
+        <button id="oteBtn" onclick="setMode('ote')"><span class="desktop-ote-label">OTE / Sales Comp</span><span class="mobile-ote-label">OTE / Sales</span></button>
+        <button id="bonusBtn" onclick="setMode('bonus')">Bonus / Commission</button>
+      </div>
+
+      <div id="salaryFields">
+        <div class="row">
+          <div><label>Annual salary</label><input id="salary" type="number" value="150000" oninput="calculate()"></div>
+          <div><label>Pay frequency</label><select id="frequency" onchange="calculate()">
+            <option value="52">Weekly</option><option value="26" selected>Biweekly</option><option value="24">Semi-monthly</option><option value="12">Monthly</option>
+          </select></div>
+        </div>
+      </div>
+
+      <div id="hourlyFields" class="hidden">
+        <div class="row">
+          <div><label>Hourly rate</label><input id="hourlyRate" type="number" value="50" step="0.01" oninput="calculate()"></div>
+          <div><label>Regular hours / pay period</label><input id="hours" type="number" value="80" step="0.25" oninput="calculate()"></div>
+        </div>
+        <div class="row">
+          <div><label>Overtime hours</label><input id="otHours" type="number" value="0" step="0.25" oninput="calculate()"></div>
+          <div><label>Overtime multiplier</label><select id="otMultiplier" onchange="calculate()"><option value="1.5">1.5×</option><option value="2">2×</option><option value="1">1×</option></select></div>
+        </div>
+      </div>
+
+      <div id="oteFields" class="hidden">
+        <div class="ote-panel">
+          <div class="section-title" style="margin-top:0">OTE / Sales Engineering Compensation</div>
+          <div class="row">
+            <div><label>Total OTE</label><input id="oteTotal" type="number" value="230000" oninput="calculate()"></div>
+            <div>
+              <label>Base portion of OTE %</label>
+              <input id="oteBasePct" type="number" value="70" min="1" max="99" step="1" oninput="calculate()">
+              <div class="helper">Example: 70 means a 70/30 split. You can enter any split.</div>
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Expected attainment %</label>
+              <input id="attainment" type="number" value="100" min="0" step="5" oninput="calculate()">
+              <div class="attainment-pills">
+                <button type="button" onclick="setAttainment(50)">50%</button>
+                <button type="button" onclick="setAttainment(75)">75%</button>
+                <button type="button" onclick="setAttainment(100)">100%</button>
+                <button type="button" onclick="setAttainment(125)">125%</button>
+              </div>
+              <div class="helper">100% = full target variable. Use the quick buttons to model conservative or stretch years.</div>
+            </div>
+            <div><label>Variable payout frequency</label><select id="variableFrequency" onchange="calculate()"><option value="12">Monthly</option><option value="4" selected>Quarterly</option><option value="26">Biweekly</option><option value="24">Semi-monthly</option><option value="1">Annual</option></select></div>
+          </div>
+          <div class="accelerator-box">
+            <div class="checkbox-line">
+              <input id="useAccelerator" type="checkbox" onchange="calculate()">
+              <label for="useAccelerator" style="margin:0">Use commission accelerator above 100% attainment</label>
+            </div>
+            <div id="acceleratorFields" class="row hidden" style="margin-top:10px;margin-bottom:0">
+              <div>
+                <label>Accelerator multiplier above 100%</label>
+                <input id="acceleratorMultiplier" type="number" value="1.5" min="1" step="0.1" oninput="calculate()">
+              </div>
+              <div class="helper" style="align-self:end;padding-bottom:12px">Example: 1.5× means attainment above 100% earns variable comp 50% faster.</div>
+            </div>
+          </div>
+
+          <div class="metrics">
+            <div class="metric"><div class="k">Base</div><div class="v" id="baseMetric">$161,000</div></div>
+            <div class="metric"><div class="k">Target variable</div><div class="v" id="variableMetric">$69,000</div></div>
+            <div class="metric"><div class="k">Expected earnings</div><div class="v" id="expectedMetric">$230,000</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="bonusFields" class="hidden">
+        <div class="ote-panel">
+          <div class="section-title" style="margin-top:0">Bonus / Commission Check</div>
+          <div class="row">
+            <div><label>Bonus / commission amount</label><input id="bonusAmount" type="number" value="10000" min="0" step="100" oninput="calculate()"></div>
+            <div><label>Payment type</label><select id="bonusPaymentType" onchange="calculate()"><option value="separate">Separate bonus / commission check</option><option value="combined">Combined with regular paycheck</option></select></div>
+          </div>
+          <div id="combinedBaseRow" class="row hidden">
+            <div><label>Regular gross pay on the same check</label><input id="bonusRegularGross" type="number" value="0" min="0" step="100" oninput="calculate()"></div>
+            <div class="helper" style="align-self:end;padding-bottom:12px">Use this only when payroll combines the bonus with normal wages.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">Tax location & filing</div>
+      <div class="row">
+        <div><label>State</label><select id="state" onchange="stateChanged()"></select></div>
+        <div><label>Federal filing status</label><select id="filingStatus" onchange="calculate()">
+          <option value="single">Single / Married filing separately</option>
+          <option value="married">Married filing jointly</option>
+          <option value="hoh" selected>Head of household</option>
+        </select></div>
+      </div>
+
+      <div id="marylandFields">
+        <div class="row">
+          <div><label>Maryland county / Baltimore City</label><select id="mdCounty" onchange="calculate()"></select></div>
+          <div><label>MW507 exemptions</label><input id="mdExemptions" type="number" value="1" min="0" step="1" oninput="calculate()"><div class="helper">Maryland treats each withholding exemption as $3,200 for 2026.</div></div>
+        </div>
+      </div>
+
+      <div id="stateCoverageNote" class="state-coverage-note"></div>
+
+      <div class="section-title">Deductions</div>
+      <div class="note" style="margin-bottom:12px">
+        Choose the deduction, enter the amount, and pick dollars per paycheck or a percentage of gross pay. Paycheck handles the tax treatment automatically.
+      </div>
+
+      <div class="subsection-label">Pre-tax deductions</div>
+      <div id="preTaxDeductions" class="deductions"></div>
+      <button class="secondary" onclick="addDeduction('pre')">+ Add pre-tax deduction</button>
+
+      <div class="subsection-label" style="margin-top:18px">Post-tax deductions</div>
+      <div id="postTaxDeductions" class="deductions"></div>
+      <button class="secondary" onclick="addDeduction('post')">+ Add post-tax deduction</button>
+
+      <div class="section-title">Tax settings</div>
+      <div class="row">
+        <div>
+          <label>Additional federal withholding / paycheck</label>
+          <input id="w4Extra" type="number" value="0" min="0" step="1" oninput="calculate()">
+          <div class="helper">Leave at $0 unless you specifically asked payroll to withhold extra federal tax.</div>
+        </div>
+        <div>
+          <label>Dependent / tax credits per year</label>
+          <input id="w4Credits" type="number" value="0" min="0" step="1" oninput="calculate()">
+          <div class="helper">Optional. Leave at $0 if you are unsure.</div>
+        </div>
+      </div>
+
+      <details class="advanced-tax-details">
+        <summary>Advanced tax settings</summary>
+        <div class="advanced-panel">
+          <div class="helper" style="margin-bottom:12px">Most people can leave these alone. Use them only if they match your actual W-4 or year-to-date payroll.</div>
+          <div class="row">
+            <div><label>Other income on W-4 / year</label><input id="w4OtherIncome" type="number" value="0" min="0" step="1" oninput="calculate()"></div>
+            <div><label>Other deductions on W-4 / year</label><input id="w4Deductions" type="number" value="0" min="0" step="1" oninput="calculate()"></div>
+          </div>
+          <div class="checkbox-line" style="margin-bottom:14px"><input id="w4MultipleJobs" type="checkbox" onchange="calculate()"><label for="w4MultipleJobs" style="margin:0">Use higher withholding for multiple jobs / spouse works</label></div>
+          <div class="row">
+            <div><label>Social Security wages already earned this year</label><input id="ytdSSWages" type="number" value="0" min="0" step="1" oninput="calculate()"></div>
+            <div><label>Medicare wages already earned this year</label><input id="ytdMedWages" type="number" value="0" min="0" step="1" oninput="calculate()"></div>
+          </div>
+        </div>
+      </details>
+
+      <div class="section-title">Pay date & year-to-date</div>
+      <div class="row">
+        <div>
+          <label>Pay date</label>
+          <input id="payDate" type="date" onchange="calculate()">
+        </div>
+        <div>
+          <label>Year-to-date wages</label>
+          <select id="ytdMode" onchange="toggleYtdMode();calculate()">
+            <option value="auto" selected>Estimate automatically from pay date</option>
+            <option value="manual">Enter manually</option>
+          </select>
+        </div>
+      </div>
+      <div id="manualYtdFields" class="row hidden">
+        <div><label>Social Security wages before this check</label><input id="ytdSSWages" type="number" value="0" min="0" step="1" oninput="calculate()"></div>
+        <div><label>Medicare wages before this check</label><input id="ytdMedWages" type="number" value="0" min="0" step="1" oninput="calculate()"></div>
+      </div>
+
+      <details class="advanced-tax-details offer-tools">
+        <summary>Total compensation / offer extras</summary>
+        <div class="advanced-panel">
+          <div class="row">
+            <div><label>Sign-on bonus</label><input id="signOnBonus" type="number" value="0" min="0" step="100" oninput="calculate()"></div>
+            <div><label>Equity / RSUs per year</label><input id="equityAnnual" type="number" value="0" min="0" step="100" oninput="calculate()"></div>
+          </div>
+          <div class="row">
+            <div><label>Employer retirement contribution (% of base)</label><input id="employerRetirementPct" type="number" value="0" min="0" step="0.1" oninput="calculate()"></div>
+            <div><label>Employer HSA contribution / year</label><input id="employerHsaAnnual" type="number" value="0" min="0" step="50" oninput="calculate()"></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="advanced-tax-details offer-tools">
+        <summary>Reverse calculator: salary needed for a target take-home</summary>
+        <div class="advanced-panel">
+          <div class="row">
+            <div><label>Target take-home per paycheck</label><input id="targetNetPay" type="number" value="5000" min="0" step="100"></div>
+            <div style="align-self:end"><button class="primary" type="button" onclick="runReverseCalculator()">Find salary</button></div>
+          </div>
+          <div id="reverseResult" class="note hidden"></div>
+        </div>
+      </details>
+
+      <div class="save-row">
+        <input id="scenarioName" placeholder="Optional scenario name, e.g. CAV Offer" style="flex:1;min-width:220px">
+        <button class="primary" onclick="saveScenario()">Save paycheck</button>
+        <button class="secondary" onclick="resetCurrentCalculator()">Reset</button>
+      </div>
+      <div class="helper" style="margin-top:8px">
+        Your current calculator setup is remembered automatically on this device. Save only when you want a named snapshot for later comparison.
+      </div>
+    </div>
+  </section>
+
+  <aside class="card">
+    <div class="card-head"><h2 id="resultTitle">Salary paycheck</h2></div>
+    <div class="card-body">
+      <div class="result-hero" id="resultHero">
+        <div class="label">Estimated take-home pay</div>
+        <div class="amount" id="netPay">$0.00</div>
+        <div class="gross" id="grossLabel">Gross paycheck: $0.00</div>
+        <div class="take-home-meter">
+          <div class="take-home-meter-row"><span>Take-home rate</span><strong id="takeHomePct">0%</strong></div>
+          <div class="take-home-track"><span id="takeHomeFill"></span></div>
+          <div id="takeHomeMood" class="take-home-mood">Enter your pay to see where it lands.</div>
+        </div>
+      </div>
+
+      <div id="modeSummary" class="result-grid"></div>
+
+      <div class="section-title">Paycheck breakdown</div>
+      <div class="breakdown">
+        <div class="line"><span>Gross pay</span><strong id="rGross">$0.00</strong></div>
+        <div class="line"><span>Pre-tax deductions</span><strong id="rPreTax">$0.00</strong></div>
+        <div class="line"><span>Federal income tax</span><strong id="rFederal">$0.00</strong></div>
+        <div class="line"><span>Social Security</span><strong id="rSS">$0.00</strong></div>
+        <div class="line"><span>Medicare</span><strong id="rMedicare">$0.00</strong></div>
+        <div class="line"><span>Additional Medicare</span><strong id="rAddMed">$0.00</strong></div>
+        <div class="line"><span id="stateTaxLabel">State/local withholding</span><strong id="rState">$0.00</strong></div>
+        <div class="line"><span>Post-tax deductions</span><strong id="rPostTax">$0.00</strong></div>
+        <div class="line total"><span><strong>Estimated take-home</strong></span><strong id="rNet">$0.00</strong></div>
+      </div>
+
+      <div id="variableResult" class="hidden" style="margin-top:18px"></div>
+
+      <div class="section-title">Annual view</div>
+      <div id="annualSummary" class="result-grid"></div>
+
+      <div class="section-title">Total compensation</div>
+      <div id="totalCompSummary" class="result-grid"></div>
+
+      <div class="result-actions">
+        <button class="secondary" onclick="copyPaycheckSummary()">Copy summary</button>
+        <button class="secondary" onclick="window.print()">Print / PDF</button>
+      </div>
+
+      <div class="tax-note" id="taxAssumptionNote"></div>
+    </div>
+  </aside>
+</div>
+</section>
+
+<section id="page-saved" class="page">
+  <div class="card">
+    <div class="card-head"><h2>Saved Paychecks</h2><div class="cloud-note">☁ Synced to your Paycheck account across devices.</div></div>
+    <div class="card-body"><div id="savedList" class="saved-list"></div></div>
+  </div>
+</section>
+
+<section id="page-compare" class="page">
+  <div class="card">
+    <div class="card-head"><h2>Compare saved offers</h2></div>
+    <div class="card-body">
+      <div class="row">
+        <div><label>Scenario A</label><select id="compareA" onchange="renderCompare()"></select></div>
+        <div><label>Scenario B</label><select id="compareB" onchange="renderCompare()"></select></div>
+      </div>
+      <div id="compareResults" class="compare-grid"></div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+
+const SUPABASE_URL="https://pzspwjkwzlxiovjgoeqm.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_a8q8_qfLLPQqlOqCG911MA_vTHNNwcU";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+
+let authMode="signin";
+let currentUser=null;
+let cloudStateLoaded=false;
+let cloudSaveTimer=null;
+let cloudScenarios=[];
+
+function setAuthMode(next){
+  authMode=next;
+  $("authSignInTab").classList.toggle("active",next==="signin");
+  $("authSignUpTab").classList.toggle("active",next==="signup");
+  $("authNameRow").classList.toggle("hidden",next!=="signup");
+  $("authSubmit").textContent=next==="signin"?"Sign in":"Create account";
+  $("authMessage").textContent="";
+}
+
+async function submitAuth(event){
+  event.preventDefault();
+  const email=$("authEmail").value.trim();
+  const password=$("authPassword").value;
+  $("authMessage").textContent=authMode==="signin"?"Signing in...":"Creating account...";
+
+  let result;
+  if(authMode==="signup"){
+    result=await sb.auth.signUp({
+      email,password,
+      options:{data:{first_name:$("authFirstName").value.trim(),last_name:$("authLastName").value.trim()}}
+    });
+  }else{
+    result=await sb.auth.signInWithPassword({email,password});
+  }
+
+  if(result.error){
+    $("authMessage").textContent=result.error.message;
+    return;
+  }
+
+  if(authMode==="signup"&&!result.data.session){
+    $("authMessage").textContent="Account created. Check your email to confirm, then sign in.";
+    return;
+  }
+}
+
+async function signOut(){
+  await sb.auth.signOut();
+  currentUser=null;
+  $("appShell").classList.add("hidden");
+  $("authGate").classList.remove("hidden");
+  $("accountMenu").classList.add("hidden");
+}
+function toggleAccountMenu(){$("accountMenu").classList.toggle("hidden")}
+function setAccountUI(){
+  const email=currentUser?.email||"Account";
+  $("accountEmail").textContent=email;
+  $("accountLabel").textContent=(currentUser?.user_metadata?.first_name||email.split("@")[0]||"Account");
+}
+function scrollToResults(){
+  document.querySelector("#page-calculator aside.card")?.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function setAttainment(value){$("attainment").value=value;calculate()}
+
+function localSavedRows(){
+  try{return JSON.parse(localStorage.getItem("paycheck:saved")||"[]")}catch{return[]}
+}
+
+async function migrateLocalDataIfNeeded(){
+  if(!currentUser)return;
+  // Current state: only upload local state if cloud has none.
+  const cloud=await sb.from("paycheck_current_state").select("state").eq("user_id",currentUser.id).maybeSingle();
+  if(!cloud.data?.state){
+    let local=null;
+    try{local=JSON.parse(localStorage.getItem(CURRENT_STATE_KEY)||"null")}catch{}
+    if(local){
+      await sb.from("paycheck_current_state").upsert({
+        user_id:currentUser.id,state:local,updated_at:new Date().toISOString()
+      },{onConflict:"user_id"});
+    }
+  }
+
+  // Named scenarios: migrate local saved rows only if no cloud scenarios exist.
+  const remote=await sb.from("paycheck_scenarios").select("id").eq("user_id",currentUser.id).limit(1);
+  if(!(remote.data||[]).length){
+    const localRows=localSavedRows();
+    if(localRows.length){
+      const payload=localRows.map(s=>({
+        user_id:currentUser.id,
+        name:s.name||"Saved paycheck",
+        scenario:s,
+        created_at:s.createdAt||new Date().toISOString()
+      }));
+      await sb.from("paycheck_scenarios").insert(payload);
+    }
+  }
+}
+
+async function loadCloudCurrentState(){
+  if(!currentUser)return false;
+  const {data,error}=await sb.from("paycheck_current_state")
+    .select("state,updated_at")
+    .eq("user_id",currentUser.id)
+    .maybeSingle();
+
+  if(error){
+    console.warn("Cloud state load failed:",error);
+    return false;
+  }
+  if(!data?.state)return false;
+
+  localStorage.setItem(CURRENT_STATE_KEY,JSON.stringify(data.state));
+  return true;
+}
+
+async function saveCloudCurrentState(){
+  if(!currentUser||restoringCurrentState)return;
+  const state=currentCalculatorState();
+  try{
+    localStorage.setItem(CURRENT_STATE_KEY,JSON.stringify(state));
+    const {error}=await sb.from("paycheck_current_state").upsert({
+      user_id:currentUser.id,
+      state,
+      updated_at:new Date().toISOString()
+    },{onConflict:"user_id"});
+    if(error)throw error;
+    $("accountLabel")?.classList.add("sync-flash");
+    setTimeout(()=>$("accountLabel")?.classList.remove("sync-flash"),500);
+  }catch(err){
+    console.warn("Cloud autosave failed:",err);
+  }
+}
+
+function scheduleCloudSave(){
+  if(!currentUser||!cloudStateLoaded)return;
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer=setTimeout(saveCloudCurrentState,550);
+}
+
+async function loadCloudScenarios(){
+  if(!currentUser){cloudScenarios=[];return}
+  const {data,error}=await sb.from("paycheck_scenarios")
+    .select("*")
+    .eq("user_id",currentUser.id)
+    .order("created_at",{ascending:false});
+  if(error){console.warn("Scenario load failed:",error);cloudScenarios=[];return}
+  cloudScenarios=(data||[]).map(row=>({
+    ...(row.scenario||{}),
+    id:row.id,
+    name:row.name||row.scenario?.name||"Saved paycheck",
+    createdAt:row.created_at
+  }));
+}
+
+async function syncNow(){
+  await saveCloudCurrentState();
+  await loadCloudScenarios();
+  renderSaved();populateCompare();renderCompare();
+  $("accountMenu").classList.add("hidden");
+}
+
+async function startAuthenticatedApp(user){
+  currentUser=user;
+  setAccountUI();
+  $("authGate").classList.add("hidden");
+  $("appShell").classList.remove("hidden");
+
+  await migrateLocalDataIfNeeded();
+  await loadCloudCurrentState();
+  await loadCloudScenarios();
+
+  cloudStateLoaded=false;
+  init();
+  cloudStateLoaded=true;
+
+  renderSaved();
+  populateCompare();
+  renderCompare();
+  scheduleCloudSave();
+}
+
+async function bootAuth(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(session?.user){
+    await startAuthenticatedApp(session.user);
+  }else{
+    $("authGate").classList.remove("hidden");
+    $("appShell").classList.add("hidden");
+  }
+
+  sb.auth.onAuthStateChange(async(event,session)=>{
+    if(event==="SIGNED_IN"&&session?.user&&session.user.id!==currentUser?.id){
+      await startAuthenticatedApp(session.user);
+    }
+    if(event==="SIGNED_OUT"){
+      currentUser=null;
+      $("appShell").classList.add("hidden");
+      $("authGate").classList.remove("hidden");
+    }
+  });
+}
+
+const STATES=[
+"Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","District of Columbia","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"
+];
+const NO_WAGE_INCOME_TAX=new Set(["Alaska","Florida","Nevada","New Hampshire","South Dakota","Tennessee","Texas","Washington","Wyoming"]);
+
+const STATE_TAX_2026={
+"Alabama":{d:[3000,8500],b:[[0,.02],[500,.04],[3000,.05]],bm:[[0,.02],[1000,.04],[6000,.05]]},
+"Arizona":{d:[8350,16700],flat:.025},
+"Arkansas":{d:[2470,4940],b:[[0,.02],[4600,.039]]},
+"California":{d:[5540,11080],b:[[0,.01],[11079,.02],[26264,.04],[41452,.06],[57542,.08],[72724,.093],[371479,.103],[445771,.113],[742953,.123],[1000000,.133]],bm:[[0,.01],[22158,.02],[52528,.04],[82904,.06],[115084,.08],[145448,.093],[742958,.103],[891542,.113],[1000000,.123],[1485906,.133]]},
+"Colorado":{d:[16100,32200],flat:.044},
+"Connecticut":{d:[0,0],b:[[0,.02],[10000,.045],[50000,.055],[100000,.06],[200000,.065],[250000,.069],[500000,.0699]],bm:[[0,.02],[20000,.045],[100000,.055],[200000,.06],[400000,.065],[500000,.069],[1000000,.0699]]},
+"Delaware":{d:[3250,6500],b:[[0,0],[2000,.022],[5000,.039],[10000,.048],[20000,.052],[25000,.0555],[60000,.066]]},
+"District of Columbia":{d:[16100,32200],b:[[0,.04],[10000,.06],[40000,.065],[60000,.085],[250000,.0925],[500000,.0975],[1000000,.1075]]},
+"Georgia":{d:[12000,24000],flat:.0519},
+"Hawaii":{d:[4400,8800],b:[[0,.014],[9600,.032],[14400,.055],[19200,.064],[24000,.068],[36000,.072],[48000,.076],[125000,.079],[175000,.0825],[225000,.09],[275000,.10],[325000,.11]],bm:[[0,.014],[19200,.032],[28800,.055],[38400,.064],[48000,.068],[72000,.072],[96000,.076],[250000,.079],[350000,.0825],[450000,.09],[550000,.10],[650000,.11]]},
+"Idaho":{d:[16100,32200],b:[[0,0],[4811,.053]],bm:[[0,0],[9622,.053]]},
+"Illinois":{d:[0,0],flat:.0495},
+"Indiana":{d:[0,0],flat:.0295},
+"Iowa":{d:[16100,32200],flat:.038},
+"Kansas":{d:[3605,8240],b:[[0,.052],[23000,.0558]],bm:[[0,.052],[46000,.0558]]},
+"Kentucky":{d:[3360,3360],flat:.035},
+"Louisiana":{d:[12875,25750],flat:.03},
+"Maine":{d:[8350,16700],b:[[0,.058],[27399,.0675],[64849,.0715]],bm:[[0,.058],[54849,.0675],[129749,.0715]]},
+"Massachusetts":{d:[0,0],b:[[0,.05],[1083150,.09]]},
+"Michigan":{d:[0,0],flat:.0425},
+"Minnesota":{d:[15300,30600],b:[[0,.0535],[33310,.068],[109430,.0785],[203150,.0985]],bm:[[0,.0535],[48700,.068],[193480,.0785],[337930,.0985]]},
+"Mississippi":{d:[2300,4600],b:[[0,0],[10000,.04]]},
+"Missouri":{d:[16100,32200],b:[[0,0],[1348,.02],[2696,.025],[4044,.03],[5392,.035],[6740,.04],[8088,.045],[9436,.047]]},
+"Montana":{d:[16100,32200],b:[[0,.047],[47500,.0565]],bm:[[0,.047],[95000,.0565]]},
+"Nebraska":{d:[8850,17700],b:[[0,.0246],[4130,.0351],[24760,.0455]],bm:[[0,.0246],[8250,.0351],[49530,.0455]]},
+"New Jersey":{d:[0,0],b:[[0,.014],[20000,.0175],[35000,.035],[40000,.0553],[75000,.0637],[500000,.0897],[1000000,.1075]],bm:[[0,.014],[20000,.0175],[50000,.0245],[70000,.035],[80000,.0553],[150000,.0637],[500000,.0897],[1000000,.1075]]},
+"New Mexico":{d:[16100,32200],b:[[0,.015],[5500,.032],[16500,.043],[33500,.047],[66500,.049],[210000,.059]],bm:[[0,.015],[8000,.032],[25000,.043],[50000,.047],[100000,.049],[315000,.059]]},
+"New York":{d:[8000,16050],b:[[0,.039],[8500,.044],[11700,.0515],[13900,.054],[80650,.059],[215400,.0685],[1077550,.0965],[5000000,.103],[25000000,.109]],bm:[[0,.039],[17150,.044],[23600,.0515],[27900,.054],[161550,.059],[323200,.0685],[2155350,.0965],[5000000,.103],[25000000,.109]]},
+"North Carolina":{d:[12750,25500],flat:.0399},
+"North Dakota":{d:[16100,32200],b:[[0,0],[48475,.0195],[244825,.025]],bm:[[0,0],[80975,.0195],[298075,.025]]},
+"Ohio":{d:[0,0],b:[[0,0],[26050,.0275]]},
+"Oklahoma":{d:[6350,12700],b:[[0,0],[3750,.025],[4900,.035],[7200,.045]],bm:[[0,0],[7500,.025],[9800,.035],[14400,.045]]},
+"Oregon":{d:[2910,5820],b:[[0,.0475],[4550,.0675],[11400,.0875],[125000,.099]],bm:[[0,.0475],[9100,.0675],[22800,.0875],[250000,.099]]},
+"Pennsylvania":{d:[0,0],flat:.0307},
+"Rhode Island":{d:[11200,22400],b:[[0,.0375],[82050,.0475],[186450,.0599]]},
+"South Carolina":{d:[8350,16700],b:[[0,0],[3640,.03],[18230,.06]]},
+"Utah":{d:[0,0],flat:.045},
+"Vermont":{d:[7650,15300],b:[[0,.0335],[49400,.066],[119700,.076],[249700,.0875]],bm:[[0,.0335],[82500,.066],[199450,.076],[304000,.0875]]},
+"Virginia":{d:[8750,17500],b:[[0,.02],[3000,.03],[5000,.05],[17000,.0575]]},
+"West Virginia":{d:[0,0],b:[[0,.0222],[10000,.0296],[25000,.0333],[40000,.0444],[60000,.0482]]},
+"Wisconsin":{d:[13960,25840],b:[[0,.035],[15110,.044],[51950,.053],[332720,.0765]],bm:[[0,.035],[20150,.044],[69260,.053],[443630,.0765]]}
+};
+const MD_COUNTIES={
+"Allegany County":.0320,"Anne Arundel County":.0294,"Baltimore County":.0320,"Baltimore City":.0320,"Calvert County":.0320,"Caroline County":.0320,"Carroll County":.0303,"Cecil County":.0274,"Charles County":.0303,"Dorchester County":.0330,"Frederick County":.0296,"Garrett County":.0265,"Harford County":.0306,"Howard County":.0320,"Kent County":.0330,"Montgomery County":.0320,"Prince George’s County":.0320,"Queen Anne’s County":.0320,"St. Mary’s County":.0320,"Somerset County":.0320,"Talbot County":.0240,"Washington County":.0295,"Wicomico County":.0320,"Worcester County":.0225
+};
+const FEDERAL_STANDARD={
+married:[[0,19300,0,0],[19300,44100,0,.10],[44100,120100,2480,.12],[120100,230700,11600,.22],[230700,422850,35932,.24],[422850,531750,82048,.32],[531750,788000,116896,.35],[788000,Infinity,206583.5,.37]],
+single:[[0,7500,0,0],[7500,19900,0,.10],[19900,57900,1240,.12],[57900,113200,5800,.22],[113200,209275,17966,.24],[209275,263725,41024,.32],[263725,648100,58448,.35],[648100,Infinity,192979.25,.37]],
+hoh:[[0,15550,0,0],[15550,33250,0,.10],[33250,83000,1770,.12],[83000,121250,7740,.22],[121250,217300,16155,.24],[217300,271750,39207,.32],[271750,656150,56631,.35],[656150,Infinity,191171,.37]]
+};
+const FEDERAL_STEP2={
+married:[[0,16100,0,0],[16100,28500,0,.10],[28500,66500,1240,.12],[66500,121800,5800,.22],[121800,217875,17966,.24],[217875,272325,41024,.32],[272325,400450,58448,.35],[400450,Infinity,103291.75,.37]],
+single:[[0,8050,0,0],[8050,14250,0,.10],[14250,33250,620,.12],[33250,60900,2900,.22],[60900,108938,8983,.24],[108938,136163,20512,.32],[136163,328350,29224,.35],[328350,Infinity,96489.63,.37]],
+hoh:[[0,12075,0,0],[12075,20925,0,.10],[20925,45800,885,.12],[45800,64925,3870,.22],[64925,112950,8077.5,.24],[112950,140175,19603.5,.32],[140175,332375,28315.5,.35],[332375,Infinity,95585.5,.37]]
+};
+
+let mode="salary";
+let lastResult=null;
+
+const $=id=>document.getElementById(id);
+const num=v=>Number(v||0);
+const money=n=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:2}).format(Number(n||0));
+const money0=n=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(Number(n||0));
+
+
+const CURRENT_STATE_KEY="paycheck:currentState";
+let restoringCurrentState=false;
+let currentStateSaveTimer=null;
+
+function serializeDeductionRows(kind){
+  const root=$(kind==="pre"?"preTaxDeductions":"postTaxDeductions");
+  if(!root)return[];
+  return [...root.querySelectorAll(".ded-row")].map(row=>({
+    value:row.querySelector(".ded-select")?.value||"",
+    amount:row.querySelector(".ded-amount")?.value||"0",
+    amountType:row.querySelector(".ded-amount-type")?.value||"dollar"
+  }));
+}
+
+function currentCalculatorState(){
+  return {
+    version:1,
+    mode,
+    page:document.querySelector(".page.active")?.id?.replace("page-","")||"calculator",
+    salary:$("salary")?.value||"",
+    frequency:$("frequency")?.value||"26",
+    hourlyRate:$("hourlyRate")?.value||"",
+    hours:$("hours")?.value||"",
+    otHours:$("otHours")?.value||"",
+    otMultiplier:$("otMultiplier")?.value||"1.5",
+    oteTotal:$("oteTotal")?.value||"",
+    oteBasePct:$("oteBasePct")?.value||"70",
+    attainment:$("attainment")?.value||"100",
+    useAccelerator:!!$("useAccelerator")?.checked,
+    acceleratorMultiplier:$("acceleratorMultiplier")?.value||"1.5",
+    bonusAmount:$("bonusAmount")?.value||"10000",
+    bonusPaymentType:$("bonusPaymentType")?.value||"separate",
+    bonusRegularGross:$("bonusRegularGross")?.value||"0",
+    variableFrequency:$("variableFrequency")?.value||"4",
+    state:$("state")?.value||"Maryland",
+    filingStatus:$("filingStatus")?.value||"hoh",
+    mdCounty:$("mdCounty")?.value||"Charles County",
+    mdExemptions:$("mdExemptions")?.value||"1",
+    payDate:$("payDate")?.value||"",
+    ytdMode:$("ytdMode")?.value||"auto",
+    signOnBonus:$("signOnBonus")?.value||"0",
+    equityAnnual:$("equityAnnual")?.value||"0",
+    employerRetirementPct:$("employerRetirementPct")?.value||"0",
+    employerHsaAnnual:$("employerHsaAnnual")?.value||"0",
+    targetNetPay:$("targetNetPay")?.value||"5000",
+    w4Credits:$("w4Credits")?.value||"0",
+    w4Extra:$("w4Extra")?.value||"0",
+    w4OtherIncome:$("w4OtherIncome")?.value||"0",
+    w4Deductions:$("w4Deductions")?.value||"0",
+    w4MultipleJobs:!!$("w4MultipleJobs")?.checked,
+    ytdSSWages:$("ytdSSWages")?.value||"0",
+    ytdMedWages:$("ytdMedWages")?.value||"0",
+    scenarioName:$("scenarioName")?.value||"",
+    pre:serializeDeductionRows("pre"),
+    post:serializeDeductionRows("post"),
+    advancedOpen:!!document.querySelector(".advanced-tax-details")?.open,
+    savedAt:new Date().toISOString()
+  };
+}
+
+function saveCurrentCalculatorState(){
+  if(restoringCurrentState)return;
+  try{
+    localStorage.setItem(CURRENT_STATE_KEY,JSON.stringify(currentCalculatorState()));
+  }catch(err){
+    console.warn("Could not save current calculator state:",err);
+  }
+}
+
+function scheduleCurrentStateSave(){
+  clearTimeout(currentStateSaveTimer);
+  currentStateSaveTimer=setTimeout(()=>{
+    saveCurrentCalculatorState();
+    scheduleCloudSave();
+  },180);
+}
+
+function restoreCurrentCalculatorState(){
+  let state=null;
+  try{state=JSON.parse(localStorage.getItem(CURRENT_STATE_KEY)||"null")}catch{}
+  if(!state)return false;
+
+  restoringCurrentState=true;
+  try{
+    setMode(state.mode||"salary");
+
+    const fields=[
+      "salary","frequency","hourlyRate","hours","otHours","otMultiplier",
+      "oteTotal","oteBasePct","attainment","variableFrequency","acceleratorMultiplier",
+      "bonusAmount","bonusPaymentType","bonusRegularGross","state","filingStatus",
+      "mdCounty","mdExemptions","payDate","ytdMode","signOnBonus","equityAnnual",
+      "employerRetirementPct","employerHsaAnnual","targetNetPay","w4Credits",
+      "w4Extra","w4OtherIncome","w4Deductions","ytdSSWages","ytdMedWages","scenarioName"
+    ];
+    fields.forEach(id=>{
+      if($(id) && state[id]!==undefined && state[id]!==null) $(id).value=state[id];
+    });
+
+    if($("w4MultipleJobs"))$("w4MultipleJobs").checked=!!state.w4MultipleJobs;
+    if($("useAccelerator"))$("useAccelerator").checked=!!state.useAccelerator;
+    if(state.oteSplit && !state.oteBasePct && $("oteBasePct")) $("oteBasePct").value=state.oteSplit;
+
+    $("preTaxDeductions").innerHTML="";
+    (state.pre||[]).forEach(d=>addDeduction("pre",d.value||"401k",d.amount||0,d.amountType||"dollar"));
+    if(!(state.pre||[]).length)addDeduction("pre","401k",0,"percent");
+
+    $("postTaxDeductions").innerHTML="";
+    (state.post||[]).forEach(d=>addDeduction("post",d.value||"roth401k",d.amount||0,d.amountType||"dollar"));
+    if(!(state.post||[]).length)addDeduction("post","roth401k",0,"dollar");
+
+    const details=document.querySelector(".advanced-tax-details");
+    if(details)details.open=!!state.advancedOpen;
+
+    stateChanged();
+    calculate();
+
+    const page=["calculator","compare","saved"].includes(state.page)?state.page:"calculator";
+    showPage(page);
+  }finally{
+    restoringCurrentState=false;
+  }
+  return true;
+}
+
+function bindCurrentStatePersistence(){
+  document.addEventListener("input",event=>{
+    if(event.target.closest("#page-calculator"))scheduleCurrentStateSave();
+  });
+  document.addEventListener("change",event=>{
+    if(event.target.closest("#page-calculator"))scheduleCurrentStateSave();
+  });
+  document.addEventListener("click",event=>{
+    if(event.target.closest("#page-calculator button"))scheduleCurrentStateSave();
+  });
+  document.addEventListener("toggle",event=>{
+    if(event.target.matches?.(".advanced-tax-details"))scheduleCurrentStateSave();
+  },true);
+  window.addEventListener("beforeunload",saveCurrentCalculatorState);
+}
+
+function resetCurrentCalculator(){
+  if(!confirm("Reset the current calculator back to the default starting values? Your intentionally saved paychecks will not be deleted."))return;
+  localStorage.removeItem(CURRENT_STATE_KEY);
+  location.reload();
+}
+
+function init(){
+  $("state").innerHTML=STATES.map(s=>`<option ${s==="Maryland"?"selected":""}>${s}</option>`).join("");
+  $("mdCounty").innerHTML=Object.keys(MD_COUNTIES).map(c=>`<option ${c==="Charles County"?"selected":""}>${c}</option>`).join("");
+  if($("payDate")&&!$("payDate").value)$("payDate").value=new Date().toISOString().slice(0,10);
+  addDeduction("pre","401k",0,"percent");
+  addDeduction("post","roth401k",0,"dollar");
+  stateChanged();
+  renderSaved();
+
+  bindCurrentStatePersistence();
+  const restored=restoreCurrentCalculatorState();
+  if(!restored){
+    calculate();
+    saveCurrentCalculatorState();
+  }
+}
+
+function showPage(page){
+  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.page===page));
+  $(`page-${page}`).classList.add("active");
+  if(page==="saved")renderSaved();
+  if(page==="compare"){populateCompare();renderCompare()}
+  if(!restoringCurrentState)scheduleCurrentStateSave();
+}
+
+function setMode(next){
+  mode=next;
+  ["salary","hourly","ote","bonus"].forEach(x=>{
+    $(x+"Btn")?.classList.toggle("active",x===next);
+    $(x+"Fields")?.classList.toggle("hidden",x!==next);
+  });
+  updateDynamicControls();
+  calculate();
+  if(!restoringCurrentState)scheduleCurrentStateSave();
+}
+
+function stateChanged(){
+  const state=$("state").value;
+  $("marylandFields").classList.toggle("hidden",state!=="Maryland");
+  const note=$("stateCoverageNote");
+  if(NO_WAGE_INCOME_TAX.has(state)){
+    note.innerHTML=`<strong>${state}:</strong> no state individual wage income tax is applied.`;
+  }else if(state==="Maryland"){
+    note.innerHTML=`<strong>Maryland:</strong> state tax plus your selected county/Baltimore City local tax are estimated automatically.`;
+  }else{
+    const localStates=new Set(["Alabama","Indiana","Iowa","Kentucky","Michigan","Missouri","New York","Ohio","Oregon","Pennsylvania"]);
+    note.innerHTML=`<strong>${state}:</strong> 2026 state income tax is estimated automatically.${localStates.has(state)?" Some cities/counties may also impose local income or wage taxes, which are not included unless specifically modeled.":""}`;
+  }
+  calculate();
+}
+
+function addDeduction(kind,name="",amount=0,amountType="dollar",taxTreatment=""){
+  const target=kind==="pre"?$("preTaxDeductions"):$("postTaxDeductions");
+  const defaultValue=kind==="pre"?"401k":"roth401k";
+  const matched=(DEDUCTION_OPTIONS[kind]||[]).find(o=>o.label===name||o.value===name);
+  const selected=matched?.value||defaultValue;
+  target.insertAdjacentHTML("beforeend",`
+    <div class="ded-row friendly-deduction-row" data-kind="${kind}">
+      <select class="ded-select" onchange="calculate()">${deductionOptionsMarkup(kind,selected)}</select>
+      <input class="ded-amount" type="number" value="${amount}" min="0" step="0.01" placeholder="0" oninput="calculate()">
+      <select class="ded-amount-type" onchange="calculate()">
+        <option value="dollar" ${amountType==="dollar"?"selected":""}>$ per paycheck</option>
+        <option value="percent" ${amountType==="percent"?"selected":""}>% of gross pay</option>
+      </select>
+      <button class="icon-btn" onclick="this.parentElement.remove();calculate()">×</button>
+    </div>
+  `);
+}
+
+function readDeductions(kind,gross){
+  const rows=[...$(kind==="pre"?"preTaxDeductions":"postTaxDeductions").querySelectorAll(".ded-row")];
+  return rows.map(row=>{
+    const select=row.querySelector(".ded-select");
+    const selectedValue=select?.value||"";
+    const option=deductionOptionByValue(kind,selectedValue);
+    const name=option?.label||"Deduction";
+    const raw=num(row.querySelector(".ded-amount")?.value);
+    const type=row.querySelector(".ded-amount-type")?.value||"dollar";
+    const amount=type==="percent"?gross*(raw/100):raw;
+    const tax=kind==="pre"?(option?.tax||"income"):"none";
+    return {name,value:selectedValue,raw,type,amount:Math.max(0,amount),tax};
+  });
+}
+
+function annualFederalTax(adjustedAnnual,status,step2){
+  const table=(step2?FEDERAL_STEP2:FEDERAL_STANDARD)[status]||FEDERAL_STANDARD.single;
+  const wage=Math.max(0,adjustedAnnual);
+  const row=table.find(r=>wage>=r[0]&&wage<r[1])||table[table.length-1];
+  return Math.max(0,row[2]+(wage-row[0])*row[3]);
+}
+
+function federalWithholding(taxableCheck,periods){
+  const status=$("filingStatus").value;
+  const adjustedAnnual=Math.max(0,(taxableCheck*periods)+num($("w4OtherIncome").value)-num($("w4Deductions").value));
+  const annualTax=annualFederalTax(adjustedAnnual,status,$("w4MultipleJobs").checked);
+  const creditPerCheck=num($("w4Credits").value)/periods;
+  return Math.max(0,(annualTax/periods)-creditPerCheck+num($("w4Extra").value));
+}
+
+function ficaWithholding(ficaWages){
+  const ytd=automaticYtdWages(ficaWages,num($("frequency").value)||26);
+  const ytdSS=ytd.ss;
+  const ytdMed=ytd.med;
+  const remainingSS=Math.max(0,184500-ytdSS);
+  const ssTaxable=Math.min(Math.max(0,ficaWages),remainingSS);
+  const ss=ssTaxable*.062;
+  const med=Math.max(0,ficaWages)*.0145;
+  const beforeOver=Math.max(0,200000-ytdMed);
+  const addTaxable=Math.max(0,ficaWages-beforeOver);
+  const addMed=addTaxable*.009;
+  return {ss,med,addMed};
+}
+
+
+function marginalTax(taxable,brackets){
+  const t=Math.max(0,taxable);
+  if(!brackets||!brackets.length)return 0;
+  let tax=0;
+  for(let i=0;i<brackets.length;i++){
+    const [start,rate]=brackets[i];
+    const end=i<brackets.length-1?brackets[i+1][0]:Infinity;
+    if(t<=start)break;
+    tax+=(Math.min(t,end)-start)*rate;
+    if(t<end)break;
+  }
+  return Math.max(0,tax);
+}
+
+function stateTaxAnnualEstimate(state,annualWages,status){
+  if(NO_WAGE_INCOME_TAX.has(state))return 0;
+  if(state==="Maryland")return null;
+  const cfg=STATE_TAX_2026[state];
+  if(!cfg)return 0;
+  const married=status==="married";
+  const deduction=married?(cfg.d?.[1]||0):(cfg.d?.[0]||0);
+  const taxable=Math.max(0,annualWages-deduction);
+  if(cfg.flat!==undefined)return taxable*cfg.flat;
+  const brackets=married?(cfg.bm||cfg.b):(cfg.b||[]);
+  return marginalTax(taxable,brackets);
+}
+
+function mdStateTaxAnnual(taxable,status){
+  const t=Math.max(0,taxable);
+  const married=status==="married"||status==="hoh";
+  const brackets=married
+    ? [[0,1000,0,.02],[1000,2000,20,.03],[2000,3000,50,.04],[3000,150000,90,.0475],[150000,175000,7072.5,.05],[175000,225000,8322.5,.0525],[225000,300000,10947.5,.055],[300000,600000,15072.5,.0575],[600000,1200000,32322.5,.0625],[1200000,Infinity,69822.5,.065]]
+    : [[0,1000,0,.02],[1000,2000,20,.03],[2000,3000,50,.04],[3000,100000,90,.0475],[100000,125000,4697.5,.05],[125000,150000,5947.5,.0525],[150000,250000,7260,.055],[250000,500000,12760,.0575],[500000,1000000,27135,.0625],[1000000,Infinity,58385,.065]];
+  const row=brackets.find(r=>t>=r[0]&&t<r[1])||brackets[brackets.length-1];
+  return row[2]+(t-row[0])*row[3];
+}
+
+function mdCountyTaxAnnual(taxable,county,status){
+  const t=Math.max(0,taxable);
+  if(county==="Anne Arundel County"){
+    if(status==="married"||status==="hoh") return t*(t<=75000?.0270:t<=480000?.0294:.0320);
+    return t*(t<=50000?.0270:t<=400000?.0294:.0320);
+  }
+  if(county==="Frederick County"){
+    if(status==="married"||status==="hoh"){
+      return t*(t<=25000?.0225:t<=100000?.0275:t<=250000?.0296:.0320);
+    }
+    return t*(t<=25000?.0225:t<=50000?.0275:t<=150000?.0296:.0320);
+  }
+  return t*(MD_COUNTIES[county]||0);
+}
+
+function stateWithholding(stateTaxableCheck,periods){
+  const state=$("state").value;
+  if(NO_WAGE_INCOME_TAX.has(state)) return {amount:0,note:`${state} has no state individual wage income tax.`};
+
+  if(state==="Maryland"){
+    const annualGross=stateTaxableCheck*periods;
+    const annualTaxable=Math.max(0,annualGross-3350-(num($("mdExemptions").value)*3200));
+    const stateTax=mdStateTaxAnnual(annualTaxable,$("filingStatus").value);
+    const localTax=mdCountyTaxAnnual(annualTaxable,$("mdCounty").value,$("filingStatus").value);
+    return {amount:(stateTax+localTax)/periods,note:`Maryland estimate includes 2026 state tax and ${$("mdCounty").value} local tax.`};
+  }
+
+  const annual=stateTaxableCheck*periods;
+  const annualTax=stateTaxAnnualEstimate(state,annual,$("filingStatus").value);
+  return {
+    amount:Math.max(0,annualTax/periods),
+    note:`${state} uses a 2026 state-level income-tax estimate based on published rates/brackets and standard deductions. Local city/county taxes are not included unless separately modeled.`
+  };
+}
+
+function updateDynamicControls(){
+  $("acceleratorFields")?.classList.toggle("hidden",!$("useAccelerator")?.checked);
+  $("combinedBaseRow")?.classList.toggle("hidden",$("bonusPaymentType")?.value!=="combined");
+}
+
+function toggleYtdMode(){
+  $("manualYtdFields")?.classList.toggle("hidden",$("ytdMode")?.value!=="manual");
+}
+
+function automaticYtdWages(currentGross,periods){
+  if($("ytdMode")?.value==="manual"){
+    return {ss:num($("ytdSSWages").value),med:num($("ytdMedWages").value)};
+  }
+  const raw=$("payDate")?.value;
+  if(!raw)return {ss:0,med:0};
+  const d=new Date(raw+"T12:00:00");
+  const start=new Date(d.getFullYear(),0,1,12,0,0);
+  const day=Math.max(0,Math.floor((d-start)/86400000));
+  const elapsed=Math.max(0,Math.floor((day/365)*periods));
+  const wages=currentGross*elapsed;
+  return {ss:wages,med:wages};
+}
+
+function computeComp(){
+  const periods=num($("frequency").value)||26;
+  let gross=0,annualBase=0,annualVariable=0,annualExpected=0,regularHoursPay=0,overtimePay=0,variablePayout=0,bonusAmount=0;
+
+  if(mode==="salary"){
+    annualBase=num($("salary").value);
+    annualExpected=annualBase;
+    gross=annualBase/periods;
+  }else if(mode==="hourly"){
+    const rate=num($("hourlyRate").value),hours=num($("hours").value),ot=num($("otHours").value),mult=num($("otMultiplier").value);
+    regularHoursPay=rate*hours; overtimePay=rate*mult*ot; gross=regularHoursPay+overtimePay;
+    annualBase=gross*periods; annualExpected=annualBase;
+  }else if(mode==="ote"){
+    const ote=num($("oteTotal").value),basePct=Math.max(0.01,Math.min(.99,num($("oteBasePct").value)/100)),att=Math.max(0,num($("attainment").value)/100),varFreq=num($("variableFrequency").value)||4;
+    annualBase=ote*basePct;
+    annualVariable=ote*(1-basePct);
+    let earnedVariable=annualVariable*Math.min(att,1);
+    if(att>1){
+      const accel=$("useAccelerator").checked?Math.max(1,num($("acceleratorMultiplier").value)||1):1;
+      earnedVariable+=annualVariable*(att-1)*accel;
+    }
+    annualExpected=annualBase+earnedVariable;
+    gross=annualBase/periods;
+    variablePayout=earnedVariable/varFreq;
+  }else if(mode==="bonus"){
+    bonusAmount=num($("bonusAmount").value);
+    const regular=$("bonusPaymentType").value==="combined"?num($("bonusRegularGross").value):0;
+    gross=regular+bonusAmount;
+    annualExpected=bonusAmount;
+  }
+  return {periods,gross,annualBase,annualVariable,annualExpected,regularHoursPay,overtimePay,variablePayout,bonusAmount};
+}
+
+function taxOneCheck(gross,periods){
+  const pre=readDeductions("pre",gross),post=readDeductions("post",gross);
+  const preTotal=pre.reduce((s,d)=>s+d.amount,0);
+  const incomeTaxReducing=pre.filter(d=>d.tax==="income"||d.tax==="all").reduce((s,d)=>s+d.amount,0);
+  const ficaReducing=pre.filter(d=>d.tax==="all").reduce((s,d)=>s+d.amount,0);
+  const federalTaxable=Math.max(0,gross-incomeTaxReducing);
+  const stateTaxable=Math.max(0,gross-incomeTaxReducing);
+  const ficaWages=Math.max(0,gross-ficaReducing);
+  const federal=federalWithholding(federalTaxable,periods);
+  const fica=ficaWithholding(ficaWages);
+  const state=stateWithholding(stateTaxable,periods);
+  const postTotal=post.reduce((s,d)=>s+d.amount,0);
+  const net=Math.max(0,gross-preTotal-federal-fica.ss-fica.med-fica.addMed-state.amount-postTotal);
+  return {gross,pre,post,preTotal,postTotal,federal,fica,state,net,federalTaxable,stateTaxable,ficaWages};
+}
+
+function taxVariablePayout(amount){
+  if(amount<=0)return null;
+  // Treat separately identified commission/bonus as supplemental wages at 22% federal.
+  const fica=ficaWithholding(amount);
+  const state=stateWithholding(amount,1);
+  const federal=amount*.22;
+  const net=Math.max(0,amount-federal-fica.ss-fica.med-fica.addMed-state.amount);
+  return {gross:amount,federal,fica,state,net};
+}
+
+
+function supplementalTaxCheck(gross){
+  const pre=readDeductions("pre",gross),post=readDeductions("post",gross);
+  const preTotal=pre.reduce((s,d)=>s+d.amount,0);
+  const incomeTaxReducing=pre.filter(d=>d.tax==="income"||d.tax==="all").reduce((s,d)=>s+d.amount,0);
+  const ficaReducing=pre.filter(d=>d.tax==="all").reduce((s,d)=>s+d.amount,0);
+  const taxable=Math.max(0,gross-incomeTaxReducing);
+  const ficaWages=Math.max(0,gross-ficaReducing);
+  const federal=taxable*.22;
+  const fica=ficaWithholding(ficaWages);
+  const state=stateWithholding(taxable,1);
+  const postTotal=post.reduce((s,d)=>s+d.amount,0);
+  const net=Math.max(0,gross-preTotal-federal-fica.ss-fica.med-fica.addMed-state.amount-postTotal);
+  return {gross,pre,post,preTotal,postTotal,federal,fica,state,net,federalTaxable:taxable,stateTaxable:taxable,ficaWages};
+}
+
+function totalCompFor(comp){
+  const retirement=comp.annualBase*(num($("employerRetirementPct")?.value)/100);
+  const hsa=num($("employerHsaAnnual")?.value);
+  const equity=num($("equityAnnual")?.value);
+  const signon=num($("signOnBonus")?.value);
+  return {retirement,hsa,equity,signon,total:comp.annualExpected+retirement+hsa+equity+signon};
+}
+
+function runReverseCalculator(){
+  const target=num($("targetNetPay").value);
+  if(target<=0)return;
+  const oldMode=mode;
+  let lo=0,hi=2000000;
+  const periods=num($("frequency").value)||26;
+  for(let i=0;i<55;i++){
+    const annual=(lo+hi)/2;
+    const net=taxOneCheck(annual/periods,periods).net;
+    if(net<target)lo=annual;else hi=annual;
+  }
+  const needed=hi;
+  $("reverseResult").classList.remove("hidden");
+  $("reverseResult").innerHTML=`To take home about <strong>${money(target)}</strong> per paycheck under your current tax/deduction settings, estimated annual salary is <strong>${money0(needed)}</strong>.`;
+}
+
+async function copyPaycheckSummary(){
+  if(!lastResult)return;
+  const comp=lastResult.comp,tax=lastResult.tax;
+  const text=[
+    "Paycheck estimate",
+    `Mode: ${mode}`,
+    `State: ${$("state").value}`,
+    `Gross/check: ${money(comp.gross)}`,
+    `Estimated net/check: ${money(tax.net)}`,
+    `Federal: ${money(tax.federal)}`,
+    `State/local: ${money(tax.state.amount)}`,
+    `Social Security: ${money(tax.fica.ss)}`,
+    `Medicare: ${money(tax.fica.med+tax.fica.addMed)}`,
+    `Annual expected earnings: ${money0(comp.annualExpected)}`
+  ].join("\\n");
+  try{await navigator.clipboard.writeText(text);alert("Paycheck summary copied.");}
+  catch{alert(text)}
+}
+
+function calculate(){
+  updateDynamicControls();
+  toggleYtdMode();
+
+  const comp=computeComp();
+  let tax;
+  if(mode==="bonus" && $("bonusPaymentType").value==="separate"){
+    tax=supplementalTaxCheck(comp.gross);
+  }else{
+    tax=taxOneCheck(comp.gross,comp.periods);
+  }
+
+  lastResult={mode,comp,tax,state:$("state").value,filing:$("filingStatus").value,county:$("mdCounty").value};
+  $("netPay").textContent=money(tax.net);
+  $("mobileNetPay").textContent=money(tax.net);
+  $("grossLabel").textContent=`Gross paycheck: ${money(comp.gross)}`;
+
+  const takeHomePct=comp.gross>0?Math.max(0,Math.min(100,(tax.net/comp.gross)*100)):0;
+  $("takeHomePct").textContent=`${Math.round(takeHomePct)}%`;
+  $("takeHomeFill").style.width=`${takeHomePct}%`;
+  $("takeHomeMood").textContent=
+    takeHomePct>=75?"A strong share of this check stays with you.":
+    takeHomePct>=65?"Pretty balanced after taxes and deductions.":
+    takeHomePct>=55?"A meaningful chunk is going to taxes or benefits.":
+    "This check has heavier taxes or deductions.";
+  $("resultHero").classList.remove("pulse"); void $("resultHero").offsetWidth; $("resultHero").classList.add("pulse");
+
+  $("rGross").textContent=money(comp.gross);
+  $("rPreTax").textContent=`-${money(tax.preTotal)}`;
+  $("rFederal").textContent=`-${money(tax.federal)}`;
+  $("rSS").textContent=`-${money(tax.fica.ss)}`;
+  $("rMedicare").textContent=`-${money(tax.fica.med)}`;
+  $("rAddMed").textContent=`-${money(tax.fica.addMed)}`;
+  $("rState").textContent=`-${money(tax.state.amount)}`;
+  $("rPostTax").textContent=`-${money(tax.postTotal)}`;
+  $("rNet").textContent=money(tax.net);
+  $("stateTaxLabel").textContent=$("state").value==="Maryland"?"Maryland state + local":`${$("state").value} withholding`;
+
+  if(mode==="salary"){
+    $("resultTitle").textContent="Salary paycheck";
+    $("modeSummary").innerHTML=`
+      <div class="mini"><div class="k">Annual salary</div><div class="v">${money0(comp.annualBase)}</div></div>
+      <div class="mini"><div class="k">Gross / check</div><div class="v">${money(comp.gross)}</div></div>
+      <div class="mini"><div class="k">Monthly equivalent</div><div class="v">${money(comp.annualBase/12)}</div></div>
+      <div class="mini"><div class="k">Paychecks / year</div><div class="v">${comp.periods}</div></div>`;
+    $("variableResult").classList.add("hidden");
+  }else if(mode==="hourly"){
+    $("resultTitle").textContent="Hourly paycheck";
+    $("modeSummary").innerHTML=`
+      <div class="mini"><div class="k">Regular pay</div><div class="v">${money(comp.regularHoursPay)}</div></div>
+      <div class="mini"><div class="k">Overtime pay</div><div class="v">${money(comp.overtimePay)}</div></div>
+      <div class="mini"><div class="k">Gross / check</div><div class="v">${money(comp.gross)}</div></div>
+      <div class="mini"><div class="k">Annualized gross</div><div class="v">${money0(comp.annualExpected)}</div></div>`;
+    $("variableResult").classList.add("hidden");
+  }else if(mode==="ote"){
+    $("resultTitle").textContent="OTE paycheck";
+    $("baseMetric").textContent=money0(comp.annualBase);
+    $("variableMetric").textContent=money0(comp.annualVariable);
+    $("expectedMetric").textContent=money0(comp.annualExpected);
+    $("modeSummary").innerHTML=`
+      <div class="mini"><div class="k">Guaranteed base</div><div class="v">${money0(comp.annualBase)}</div></div>
+      <div class="mini"><div class="k">Target variable</div><div class="v">${money0(comp.annualVariable)}</div></div>
+      <div class="mini"><div class="k">Expected earnings</div><div class="v">${money0(comp.annualExpected)}</div></div>
+      <div class="mini"><div class="k">Base gross / check</div><div class="v">${money(comp.gross)}</div></div>`;
+    const vr=taxVariablePayout(comp.variablePayout);
+    $("variableResult").classList.toggle("hidden",!vr);
+    if(vr){
+      $("variableResult").innerHTML=`
+        <div class="section-title">Variable payout estimate</div>
+        <div class="note" style="margin-bottom:10px">Separately identified commission is modeled using the IRS optional 22% federal supplemental withholding method.</div>
+        <div class="breakdown">
+          <div class="line"><span>Gross variable payout</span><strong>${money(vr.gross)}</strong></div>
+          <div class="line"><span>Federal supplemental withholding</span><strong>-${money(vr.federal)}</strong></div>
+          <div class="line"><span>Social Security</span><strong>-${money(vr.fica.ss)}</strong></div>
+          <div class="line"><span>Medicare + additional Medicare</span><strong>-${money(vr.fica.med+vr.fica.addMed)}</strong></div>
+          <div class="line"><span>State/local withholding</span><strong>-${money(vr.state.amount)}</strong></div>
+          <div class="line total"><span><strong>Estimated variable take-home</strong></span><strong>${money(vr.net)}</strong></div>
+        </div>`;
+    }
+  }else{
+    $("resultTitle").textContent="Bonus / commission check";
+    $("modeSummary").innerHTML=`
+      <div class="mini"><div class="k">Bonus / commission</div><div class="v">${money(comp.bonusAmount)}</div></div>
+      <div class="mini"><div class="k">Payment treatment</div><div class="v" style="font-size:14px">${$("bonusPaymentType").value==="separate"?"Separate check":"Combined check"}</div></div>
+      <div class="mini"><div class="k">Gross check</div><div class="v">${money(comp.gross)}</div></div>
+      <div class="mini"><div class="k">Estimated net</div><div class="v">${money(tax.net)}</div></div>`;
+    $("variableResult").classList.add("hidden");
+  }
+
+  const annualGross=mode==="bonus"?comp.gross:comp.gross*comp.periods;
+  const annualNet=mode==="bonus"?tax.net:tax.net*comp.periods;
+  const annualTax=mode==="bonus"?(tax.federal+tax.fica.ss+tax.fica.med+tax.fica.addMed+tax.state.amount):
+    (tax.federal+tax.fica.ss+tax.fica.med+tax.fica.addMed+tax.state.amount)*comp.periods;
+  const annualDeductions=mode==="bonus"?(tax.preTotal+tax.postTotal):(tax.preTotal+tax.postTotal)*comp.periods;
+  $("annualSummary").innerHTML=`
+    <div class="mini"><div class="k">Annual gross</div><div class="v">${money0(annualGross)}</div></div>
+    <div class="mini"><div class="k">Annual take-home</div><div class="v">${money0(annualNet)}</div></div>
+    <div class="mini"><div class="k">Taxes</div><div class="v">${money0(annualTax)}</div></div>
+    <div class="mini"><div class="k">Your deductions</div><div class="v">${money0(annualDeductions)}</div></div>`;
+
+  const tc=totalCompFor(comp);
+  $("totalCompSummary").innerHTML=`
+    <div class="mini"><div class="k">Cash earnings</div><div class="v">${money0(comp.annualExpected)}</div></div>
+    <div class="mini"><div class="k">Employer retirement</div><div class="v">${money0(tc.retirement)}</div></div>
+    <div class="mini"><div class="k">Equity + HSA + sign-on</div><div class="v">${money0(tc.equity+tc.hsa+tc.signon)}</div></div>
+    <div class="mini"><div class="k">Estimated total comp</div><div class="v">${money0(tc.total)}</div></div>`;
+
+  $("taxAssumptionNote").innerHTML=`<strong>2026 estimate.</strong> Federal withholding uses the IRS percentage method for 2020+ W-4s; separately paid supplemental wages use the optional 22% method. Social Security uses the 2026 wage base and Medicare rules. ${tax.state.note}`;
+  if(!restoringCurrentState)scheduleCurrentStateSave();
+}
+
+function currentScenarioData(){
+  return {
+    id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),
+    name:$("scenarioName").value.trim()||`${mode==="ote"?"OTE":mode==="hourly"?"Hourly":"Salary"} scenario`,
+    createdAt:new Date().toISOString(),
+    mode,
+    result:lastResult,
+    inputs:{
+      salary:$("salary").value,frequency:$("frequency").value,hourlyRate:$("hourlyRate").value,hours:$("hours").value,otHours:$("otHours").value,otMultiplier:$("otMultiplier").value,
+      oteTotal:$("oteTotal").value,oteBasePct:$("oteBasePct").value,attainment:$("attainment").value,variableFrequency:$("variableFrequency").value,
+      useAccelerator:$("useAccelerator").checked,acceleratorMultiplier:$("acceleratorMultiplier").value,
+      bonusAmount:$("bonusAmount").value,bonusPaymentType:$("bonusPaymentType").value,bonusRegularGross:$("bonusRegularGross").value,
+      state:$("state").value,filingStatus:$("filingStatus").value,mdCounty:$("mdCounty").value,mdExemptions:$("mdExemptions").value,
+      payDate:$("payDate").value,ytdMode:$("ytdMode").value,signOnBonus:$("signOnBonus").value,equityAnnual:$("equityAnnual").value,
+      employerRetirementPct:$("employerRetirementPct").value,employerHsaAnnual:$("employerHsaAnnual").value,targetNetPay:$("targetNetPay").value,
+      w4Credits:$("w4Credits").value,w4Extra:$("w4Extra").value,
+      w4OtherIncome:$("w4OtherIncome").value,w4Deductions:$("w4Deductions").value,w4MultipleJobs:$("w4MultipleJobs").checked,ytdSSWages:$("ytdSSWages").value,ytdMedWages:$("ytdMedWages").value,
+      pre:readDeductions("pre",lastResult.comp.gross),post:readDeductions("post",lastResult.comp.gross)
+    }
+  };
+}
+
+function getSaved(){return cloudScenarios||[]}
+async function saveScenario(){
+  if(!currentUser)return;
+  calculate();
+  const item=currentScenarioData();
+  const {error}=await sb.from("paycheck_scenarios").insert({
+    user_id:currentUser.id,
+    name:item.name,
+    scenario:item
+  });
+  if(error){alert("Could not save paycheck: "+error.message);return}
+  $("scenarioName").value="";
+  await loadCloudScenarios();
+  renderSaved();populateCompare();renderCompare();
+  alert(`Saved "${item.name}" to your account.`);
+}
+async function deleteScenario(id){
+  const {error}=await sb.from("paycheck_scenarios").delete().eq("id",id).eq("user_id",currentUser.id);
+  if(error){alert(error.message);return}
+  await loadCloudScenarios();renderSaved();populateCompare();renderCompare();
+}
+function loadScenario(id){
+  const s=(cloudScenarios||[]).find(x=>x.id===id);if(!s)return;
+  const i=s.inputs;setMode(s.mode);
+  ["salary","frequency","hourlyRate","hours","otHours","otMultiplier","oteTotal","oteBasePct","attainment","variableFrequency","acceleratorMultiplier","bonusAmount","bonusPaymentType","bonusRegularGross","state","filingStatus","mdCounty","mdExemptions","payDate","ytdMode","signOnBonus","equityAnnual","employerRetirementPct","employerHsaAnnual","targetNetPay","w4Credits","w4Extra","w4OtherIncome","w4Deductions","ytdSSWages","ytdMedWages"].forEach(k=>{if($(k)&&i[k]!==undefined)$(k).value=i[k]});
+  $("w4MultipleJobs").checked=!!i.w4MultipleJobs; if($("useAccelerator"))$("useAccelerator").checked=!!i.useAccelerator; if(i.oteSplit&&!i.oteBasePct&&$("oteBasePct"))$("oteBasePct").value=i.oteSplit;
+  $("preTaxDeductions").innerHTML="";(i.pre||[]).forEach(d=>addDeduction("pre",d.value||d.name,d.type==="percent"?d.raw:d.amount,d.type));
+  $("postTaxDeductions").innerHTML="";(i.post||[]).forEach(d=>addDeduction("post",d.value||d.name,d.type==="percent"?d.raw:d.amount,d.type));
+  stateChanged();calculate();showPage("calculator");
+}
+function renderSaved(){
+  const rows=getSaved();const el=$("savedList");if(!el)return;
+  el.innerHTML=rows.length?rows.map(s=>`
+    <div class="saved-card">
+      <div class="saved-card-top"><div><h3>${escapeHtml(s.name)}</h3><div class="saved-meta">${escapeHtml(s.mode.toUpperCase())} · ${escapeHtml(s.result?.state||"")} · saved ${new Date(s.createdAt).toLocaleDateString()}</div></div><span class="badge">${money(s.result?.tax?.net||0)} net/check</span></div>
+      <div class="result-grid">
+        <div class="mini"><div class="k">Annual expected</div><div class="v">${money0(s.result?.comp?.annualExpected||0)}</div></div>
+        <div class="mini"><div class="k">Gross / check</div><div class="v">${money(s.result?.comp?.gross||0)}</div></div>
+      </div>
+      <div class="saved-actions"><button class="primary" onclick="loadScenario('${s.id}')">Load</button><button class="secondary" onclick="deleteScenario('${s.id}')">Delete</button></div>
+    </div>`).join(""):`<div class="note">No saved paycheck scenarios yet. Save one from Calculator, then you can compare offers here.</div>`;
+}
+function populateCompare(){
+  const rows=getSaved();const opts=rows.map(s=>`<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("");
+  $("compareA").innerHTML=opts;$("compareB").innerHTML=opts;
+  if(rows.length>1)$("compareB").value=rows[1].id;
+}
+function renderCompare(){
+  const rows=getSaved(),a=rows.find(x=>x.id===$("compareA")?.value),b=rows.find(x=>x.id===$("compareB")?.value);
+  if(!a||!b){$("compareResults").innerHTML=`<div class="note">Save at least two paycheck scenarios to compare them.</div>`;return}
+  const betterA=(a.result?.tax?.net||0)>(b.result?.tax?.net||0);
+  $("compareResults").innerHTML=[a,b].map((s,idx)=>`
+    <div class="compare-result ${(idx===0&&betterA)||(idx===1&&!betterA)?"compare-winner":""}">
+      <h3>${escapeHtml(s.name)}</h3>
+      <div class="line"><span>Expected annual earnings</span><strong>${money0(s.result.comp.annualExpected)}</strong></div>
+      <div class="line"><span>Gross / check</span><strong>${money(s.result.comp.gross)}</strong></div>
+      <div class="line"><span>Estimated net / check</span><strong>${money(s.result.tax.net)}</strong></div>
+      <div class="line"><span>Federal withholding</span><strong>${money(s.result.tax.federal)}</strong></div>
+      <div class="line"><span>State/local withholding</span><strong>${money(s.result.tax.state.amount)}</strong></div>
+    </div>`).join("");
+}
+function escapeHtml(v=""){return String(v).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+
+bootAuth();
+</script>
+<div id="mobileNetBar" class="mobile-net-bar">
+      <div><span>Estimated take-home</span><strong id="mobileNetPay">$0.00</strong></div>
+      <button onclick="scrollToResults()">View breakdown</button>
+    </div>
+</div>
+</body>
+</html>
